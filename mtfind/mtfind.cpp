@@ -75,7 +75,6 @@ int main(int argc, char* argv[])
 
     auto answers = solution->GetAnswers();    
     std::cout << answers->size() << "\n";
-    //std::sort(answers.begin(), answers.end());
     for (auto el : *answers) {
         std::cout << el.second;
     }
