@@ -8,51 +8,39 @@
 #include <mutex>
 #include "Solution.h"
 
-bool checkFlags(char* argv[]) {
+bool initMaskAndFile(int& argc, char* argv[], std::ifstream& in, std::string& mask) {
     
     auto result = true;
-    
-    if (!argv[1]) {
-        std::cout << "Specifay a file \n";
+    if (argc != 3) {
+        std::cout << "Wrong number of arguments, need: \n1. Path to the file \n2. Search mask\n";
+        std::cout << "Example : mtfind input.txt ""?ad""\n";
+        return false;
+    }
+
+    in.open(argv[1]);
+    if (!in.good())
+    {
+        std::cout << "Cannot open file '" << argv[1] <<
+            "' invalid path or filename \n";
         result = false;
     }
-    else
-    {
-        std::ifstream in(argv[1]);
-        if (!in)
-        {
-            std::cout << "Cannot open file '" << argv[1] <<
-                "' invalid path or filename \n";
-            result = false;
-        }
-        in.close();
-    }    
 
-    if (!argv[2])
+    mask = argv[2];
+    if (mask.empty())
     {
         std::cout << "Invalid mask \n";
         result = false;
-    }
-    else {
-        std::string mask(argv[2]);
-
-        if (mask.empty())
-        {
-            std::cout << "Invalid mask \n";
-            result = false;
-        }
-    }
-    
+    }    
     return result;
 }
 
 int main(int argc, char* argv[])
 {
-    if (!checkFlags(argv)) {
+    std::ifstream in;
+    std::string mask;
+    if (!initMaskAndFile(argc, argv, in, mask)) {
         return 0;
-    }
-    std::ifstream in(argv[1]);
-    std::string mask(argv[2]);
+    }    
 
     std::string line;
     int lineNumber = 0;     
@@ -60,17 +48,13 @@ int main(int argc, char* argv[])
 
     //TODO: оптимизировать количество создаваемых потоков 
     boost::asio::thread_pool pool(std::thread::hardware_concurrency());   
-
-    if (in.is_open())
+    
+    while (getline(in, line))
     {
-        while (getline(in, line))
-        {
-            lineNumber++;
-            boost::asio::post(pool, boost::bind(&Solution::FindMask, 
-                solution, line, std::ref(mask), lineNumber));
-        }   
+        lineNumber++;
+        boost::asio::post(pool, boost::bind(&Solution::FindMask,
+            solution, line, std::ref(mask), lineNumber));
     }
-
     pool.join();
 
     auto answers = solution->GetAnswers();    
