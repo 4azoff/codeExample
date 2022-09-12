@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
     int lineNumber = 0;     
     auto solution = new Solution();
 
+    //TODO: оптимизировать количество создаваемых потоков 
     boost::asio::thread_pool pool(std::thread::hardware_concurrency());   
 
     if (in.is_open())
