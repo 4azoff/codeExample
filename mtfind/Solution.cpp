@@ -2,7 +2,7 @@
 #include <string>
 #include <utility>
 
-std::vector<std::pair<int, std::string>>* Solution::GetAnswers() 
+std::map<std::pair<int, int>, std::string>* Solution::GetAnswers()
 {
     return &answers;
 }
@@ -20,8 +20,8 @@ void Solution::FindMask(const std::string line, const std::string& mask, const i
         }
         if (ans.size() == mask.size()) {
             std::lock_guard<std::mutex> lockit(answerMutex);
-            answers.push_back(std::make_pair(lineNumber, std::to_string(lineNumber) + " " + std::to_string(i + 1) +
-                " " + ans + "\n"));
+            answers[std::make_pair(lineNumber, i + 1)] = std::to_string(lineNumber) + " " + std::to_string(i + 1) +
+                " " + ans + "\n";           
             ans.clear();
             i = j - 1;
         }
