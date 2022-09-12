@@ -5,33 +5,9 @@
 #include <vector>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
 #include <mutex>
-
-std::mutex answersMutex;
-
-void FindMask(const std::string line, const std::string& mask, const int lineNumber,
-    std::vector<std::pair<int, std::string>>& answers){
-    std::string ans;
-    for (size_t i = 0; i < line.size(); i++) {
-        auto j = i;
-        size_t h = 0;
-        while (h < mask.size() && j < line.size() && 
-            (line[j] == mask[h] || mask[h] == '?')) {
-            ans += line[j];
-            j++, h++;
-        }
-        if (ans.size() == mask.size()) {
-            std::lock_guard<std::mutex> lockit(answersMutex);
-            answers.push_back(std::make_pair(lineNumber, std::to_string(lineNumber) + " " + std::to_string(i + 1) +
-                " " + ans + "\n"));
-            ans.clear();
-            i = j - 1; 
-        }
-        else {
-            ans.clear();
-        }
-    }
-}
+#include "Solution.h"
 
 bool checkFlags(char* argv[]) {
     
@@ -81,7 +57,7 @@ int main(int argc, char* argv[])
 
     std::string line;
     int lineNumber = 0;     
-    std::vector<std::pair<int, std::string>> answers;
+    auto solution = new Solution();
 
     boost::asio::thread_pool pool(std::thread::hardware_concurrency());   
 
@@ -90,18 +66,20 @@ int main(int argc, char* argv[])
         while (getline(in, line))
         {
             lineNumber++;
-            boost::asio::post(pool, std::bind(FindMask, line, 
-                std::ref(mask), lineNumber, std::ref(answers)));           
-        }
+            boost::asio::post(pool, boost::bind(&Solution::FindMask, 
+                solution, line, std::ref(mask), lineNumber));
+        }   
     }
-    in.close();     
+
     pool.join();
 
-    std::cout << answers.size() << "\n";
-    std::sort(answers.begin(), answers.end());
-    for (auto el : answers) {
+    auto answers = solution->GetAnswers();    
+    std::cout << answers->size() << "\n";
+    //std::sort(answers.begin(), answers.end());
+    for (auto el : *answers) {
         std::cout << el.second;
     }
+    delete solution;
 
     return 0;
 }
