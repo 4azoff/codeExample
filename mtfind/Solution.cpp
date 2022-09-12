@@ -1,6 +1,4 @@
 #include "Solution.h"
-#include <string>
-#include <utility>
 
 std::map<std::pair<int, int>, std::string>* Solution::GetAnswers()
 {
