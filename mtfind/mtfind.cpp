@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 
     std::string line;
     int lineNumber = 0;     
-    auto solution = new Solution();
+    auto solution = std::make_shared<Solution>();
 
     //TODO: оптимизировать количество создаваемых потоков 
     boost::asio::thread_pool pool(std::thread::hardware_concurrency());   
@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
     for (auto el : *answers) {
         std::cout << el.second;
     }
-    delete solution;
 
     return 0;
 }
