@@ -5,6 +5,7 @@ std::map<std::pair<int, int>, std::string>* Solution::GetAnswers()
     return &answers;
 }
 
+//TODO::Change alogorithm to Slide window
 void Solution::FindMask(const std::string line, const std::string& mask, const int lineNumber)
 {
     std::string ans;
